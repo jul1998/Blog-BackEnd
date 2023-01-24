@@ -1,4 +1,3 @@
 from .user import signup
-from .login import login
 from .protected import protected
-from .logout import logout
+from .posts_route import create_post, show_posts

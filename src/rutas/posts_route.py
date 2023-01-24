@@ -1,0 +1,42 @@
+import os
+from ..main import request, jsonify, app, bcrypt, create_access_token, get_jwt_identity, jwt_required, get_jwt
+from ..db import db
+from ..modelos import User, BlockedList, Posts
+from flask import Flask, url_for, redirect
+from datetime import datetime, timezone, time
+import json
+from ..utils import APIException
+from datetime import datetime
+
+
+@app.route("/create_posts", methods=["GET","POST"])
+def create_post():
+    body = request.get_json()
+    print(body)
+    now = datetime.now().strftime("%Y-%m-%d")
+    try:
+
+        new_post = Posts(title=body["title"], subtitle=body["subtitle"], content=body["content"], created_at = now, author_id=body["author_id"] )
+        db.session.add(new_post)
+        db.session.commit()
+        return jsonify({"message":"Post was created"})
+    except Exception as err:
+        raise APIException(f"Something went wrong when creating post: {err}")
+
+   
+
+@app.route("/show_posts")
+def show_posts():
+    posts = Posts.query.all()
+    all_posts_list = list(map(lambda post: post.serialize(), posts))
+    return jsonify(all_posts_list)
+
+@app.route("/post/<int:post_id>")
+def show_post_by_id(post_id):
+    
+    post = Posts.query.filter_by(id=post_id).first()
+
+    if not post:
+        raise APIException("Post does not exist", status_code=400)
+
+    return jsonify(post.serialize())
