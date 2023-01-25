@@ -14,9 +14,13 @@ def create_post():
     body = request.get_json()
     print(body)
     now = datetime.now().strftime("%Y-%m-%d")
+    post_img = None
+    if body["post_img"]:
+        post_img = body["post_img"]
+
     try:
 
-        new_post = Posts(title=body["title"], subtitle=body["subtitle"], content=body["content"], created_at = now, author_id=body["author_id"] )
+        new_post = Posts(title=body["title"],post_img=post_img, subtitle=body["subtitle"], content=body["content"], created_at = now, author_id=body["author_id"] )
         db.session.add(new_post)
         db.session.commit()
         return jsonify({"message":"Post was created"})
