@@ -11,6 +11,7 @@ from .admin import setup_admin
 from .db import db
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager, login_manager
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -23,6 +24,9 @@ jwt = JWTManager(app)
 
 # Setup de Bcrypt
 bcrypt = Bcrypt(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 MIGRATE = Migrate(app, db)

@@ -1,5 +1,5 @@
 import os
-from ..main import request, jsonify, app, bcrypt, create_access_token, get_jwt_identity, jwt_required, get_jwt
+from ..main import request, jsonify, app, bcrypt, create_access_token, get_jwt_identity, jwt_required, get_jwt,login_manager
 from ..db import db
 from ..modelos import User, BlockedList
 from flask import Flask, url_for, redirect
@@ -7,6 +7,9 @@ from datetime import datetime, timezone, time
 import json
 from ..utils import APIException
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -49,12 +52,55 @@ def login():
 
     user = User.query.filter_by(email=email).first()
 
-    if user is None:
-        raise APIException("usuario no existe", status_code=401)
+    if not user:
+        raise APIException("User does not exist", status_code=401)
 
-    # validamos el password si el usuario existe y si coincide con el de la BD
+    # validate if password enter by user and password in DB matches
     if not bcrypt.check_password_hash(user.password, password):
-        raise APIException("usuario o password no coinciden", status_code=401)
+        raise APIException("User or password does not match. Check again!", status_code=401)
 
     access_token = create_access_token(identity=user.id, additional_claims={"is_administrator": False}, fresh=True) # Fresh here means that token whill refresh when user is authenticated
     return jsonify({"token": access_token, "user_id":user.id , "email": user.email, "message": f"Welcome, {user.name.split(' ')[0]}"}), 200
+
+
+@app.route('/user_access_protected', methods=['GET'])  
+@jwt_required()  # Decorator that protects this route
+def access_protected():  
+    #claims = get_jwt()
+
+    print("User Id", get_jwt_identity())
+
+    user = User.query.get(get_jwt_identity())
+    
+    # get_jwt() returns an object with an important property called jti
+    jti = get_jwt()["jti"]
+
+    tokenBlocked = BlockedList.query.filter_by(token=jti).first()
+    # cuando hay coincidencia tokenBloked es instancia de la clase TokenBlockedList
+    # cuando No hay coincidencia tokenBlocked = None
+
+    if isinstance(tokenBlocked, BlockedList):
+        return jsonify({"message":"Access denied"})
+
+    response_body = {
+        "isToken": "token válido",
+        "user_id": user.id,  # get_jwt_identity(),
+        "user_email": user.email,
+    }
+
+    return jsonify(response_body), 200
+
+
+    
+@app.route('/logout', methods=['GET'])  
+@jwt_required()
+def logout():
+    print(get_jwt())
+    jti = get_jwt()["jti"]
+    now = datetime.now(timezone.utc)
+
+    tokenBlocked = BlockedList(token=jti, created_at=now)
+    db.session.add(tokenBlocked)
+    db.session.commit()
+
+    return jsonify({"message": "Token was deleted"})
