@@ -71,7 +71,7 @@ def access_protected():
     print("User Id", get_jwt_identity())
 
     user = User.query.get(get_jwt_identity())
-
+    
     # get_jwt() returns an object with an important property called jti
     jti = get_jwt()["jti"]
 
