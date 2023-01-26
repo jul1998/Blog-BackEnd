@@ -1,3 +1,2 @@
-from .user import signup
-from .protected import protected
+from .user_route import signup, access_protected, login
 from .posts_route import create_post, show_posts
