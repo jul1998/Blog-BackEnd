@@ -66,7 +66,6 @@ def login():
 @app.route('/user_access_protected', methods=['GET'])  
 @jwt_required()  # Decorator that protects this route
 def access_protected():  
-    #claims = get_jwt()
 
     print("User Id", get_jwt_identity())
 
