@@ -49,3 +49,27 @@ def show_post_by_id(post_id):
         raise APIException("Post does not exist", status_code=400)
 
     return jsonify(post.serialize())
+
+@app.route("/delete_post/<int:post_id>", methods=["DELETE"])
+@jwt_required()
+def delete(post_id):
+    post_to_delete = Posts.query.get(post_id)
+    db.session.delete(post_to_delete)
+    db.session.commit()
+    return jsonify({"message":"Post was deleted"})
+
+@app.route("/edit_post/<int:post_id>", methods=["PUT"])
+@jwt_required()
+def update_post(post_id):
+    body = request.get_json()
+    post = Posts.query.get(post_id)
+    post.title = body["title"]
+    post.subtitle = body["subtitle"]
+    post.content = body["content"]
+    if not body["post_img"]:
+        pass
+    else:
+        post.post_img = body["post_img"]
+    print(body)
+    db.session.commit()
+    return jsonify({"message":"Post updated"})
