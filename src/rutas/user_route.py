@@ -6,10 +6,24 @@ from flask import Flask, url_for, redirect
 from datetime import datetime, timezone, time
 import json
 from ..utils import APIException
+from functools import wraps
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+def admin_only(func):
+    @wraps(func)
+    def wrapper(*args,**kwargs):
+        try:
+            if get_jwt_identity().id != 1:
+                return jsonify("Not a admin")
+
+        except AttributeError:
+            pass
+        else:
+            return func(*args, **kwargs)
+    return wrapper
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -65,6 +79,7 @@ def login():
 
 @app.route('/user_access_protected', methods=['GET'])  
 @jwt_required()  # Decorator that protects this route
+
 def access_protected():  
 
     print("User Id", get_jwt_identity())
