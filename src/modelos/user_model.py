@@ -11,6 +11,7 @@ class User(db.Model):
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
     img_profile = db.Column(db.Text(), unique= False, nullable=True)
     post = db.relationship("Posts", back_populates="author")
+    comments = db.relationship("Comments", back_populates="comment_author")
 
 
     def __repr__(self):

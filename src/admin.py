@@ -3,7 +3,7 @@ from flask_admin import Admin
 from .db import db
 
 ### Importar los modelos #####
-from src.modelos import User, BlockedList, Posts
+from src.modelos import User, BlockedList, Posts, Comments
 
 from flask_admin.contrib.sqla import ModelView
 
@@ -17,6 +17,7 @@ def setup_admin(app):
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(BlockedList, db.session))
     admin.add_view(ModelView(Posts, db.session))
+    admin.add_view(ModelView(Comments, db.session))
 
     # You can duplicate that line to add mew models
     # admin.add_view(ModelView(YourModelName, db.session))
