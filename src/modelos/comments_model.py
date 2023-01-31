@@ -9,6 +9,8 @@ class Comments(db.Model):
     comment = db.Column(db.Text, nullable=False)
     comment_author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     comment_author = db.relationship("User", back_populates="comments")
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
 
     def serialize(self):
         return ({
@@ -16,5 +18,6 @@ class Comments(db.Model):
             "comment": self.comment,
             "created_at": self.created_at,
             "comment_author_id": self.comment_author_id,
-            "comment_author": self.comment_author.serialize()
+            "comment_author": self.comment_author.serialize(),
+            "post_id": self.post_id
         })
