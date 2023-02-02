@@ -63,3 +63,12 @@ def display_all_comments_by_post(post_id):
     
     comments_serialized = list(map(lambda comment: comment.serialize(), comments))
     return jsonify(comments_serialized), 200
+
+@app.route("/delete_comment/<int:comment_id>", methods=["DELETE"])
+def delete_comment(comment_id):
+    comment = Comments.query.get(comment_id)
+    if comment is None:
+        raise APIException("Comment not found", status_code=404)
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message":"Comment deleted"}), 200
