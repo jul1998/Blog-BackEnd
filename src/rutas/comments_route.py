@@ -9,6 +9,7 @@ from ..utils import APIException
 from functools import wraps
 
 @app.route("/create_comment", methods=["POST"])
+@jwt_required()
 def create_comment():
     body = request.get_json()
     now = datetime.now().strftime("%Y-%m-%d")
@@ -43,6 +44,7 @@ def create_comment():
         raise APIException(f"Error when registering new comment: {err}", status_code=400)
 
 @app.route("/get_comments", methods=["GET"])
+@jwt_required()
 def get_comments():
     comments = Comments.query.all()
     comments = list(map(lambda x: x.serialize(), comments))
@@ -65,6 +67,7 @@ def display_all_comments_by_post(post_id):
     return jsonify(comments_serialized), 200
 
 @app.route("/delete_comment/<int:comment_id>", methods=["DELETE"])
+@jwt_required()
 def delete_comment(comment_id):
     comment = Comments.query.get(comment_id)
     if comment is None:
