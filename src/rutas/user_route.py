@@ -12,15 +12,15 @@ from functools import wraps
 def load_user(user_id):
     return User.query.get(user_id)
 
+
 def admin_only(func):
     @wraps(func)
     def wrapper(*args,**kwargs):
         try:
-            if get_jwt_identity().id != 1:
-                return jsonify("Not a admin")
-
+            if get_jwt_identity().id != 2:
+                return jsonify("Not a admin"), 403
         except AttributeError:
-            pass
+            return jsonify("Not a admin"), 403
         else:
             return func(*args, **kwargs)
     return wrapper
@@ -118,3 +118,10 @@ def logout():
     db.session.commit()
 
     return jsonify({"message": "Token was deleted"})
+
+@app.route("/admin_only", methods=["GET"])
+@jwt_required()
+@admin_only
+def admin_only():
+
+    return jsonify("Welcome admin")
