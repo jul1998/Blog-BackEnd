@@ -8,19 +8,15 @@ import json
 from ..utils import APIException
 from functools import wraps
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
-
 
 def admin_only(func):
     @wraps(func)
     def wrapper(*args,**kwargs):
         try:
-            if get_jwt_identity().id != 2:
+            if get_jwt_identity() != 2:
                 return jsonify("Not a admin"), 403
         except AttributeError:
-            return jsonify("Not a admin"), 403
+            return jsonify("Not a admin error"), 403
         else:
             return func(*args, **kwargs)
     return wrapper
